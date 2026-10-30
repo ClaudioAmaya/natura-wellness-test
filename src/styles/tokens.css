@@ -1,0 +1,24 @@
+/* Sampled from public/reference/buy-box.png unless marked. Ratios are WCAG contrast. */
+:root {
+  --page: #fbf8f3;
+  --ink: #1c2420; /* 15.88:1 on white */
+  --green: #17402f; /* 11.60:1 on white, 10.95:1 on --page, 9.04:1 on --active-bg */
+  --on-green: #ffffff;
+  --active-bg: #d5e8d9; /* chosen, not sampled: a visibly light green for the Active pill */
+  --text-inactive: #4a5550; /* 7.76:1 on white */
+  --muted: #6b7a70; /* 4.52:1 on white only (4.27 on --page): >= 14px, white surfaces only */
+  --amber-text: #7a5a12; /* 5.20:1 on --amber-bg */
+  --amber-bg: #f6e7c4;
+  --neutral-bg: #efebe4; /* chosen, not sampled */
+  --border: #e7e1d6; /* decorative only, ~1.3:1 */
+
+  --font-serif: "Fraunces", Georgia, serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--font-sans);
+}

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { fixtures } from "../api/fixtures";
 import type { Subscription } from "../api/types";
-import { formatDate, formatMoney, toView, type SubscriptionView } from "./subscriptionView";
+import { formatDate, formatMoney, formatShortDate, toView, type SubscriptionView } from "./subscriptionView";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -94,6 +94,20 @@ describe("formatDate", () => {
     const view = asActive(toView(sub));
     expect(formatDate(view.nextChargeAt)).toBe("Monday, December 28");
     expect(formatDate(view.skipTo)).toBe("Wednesday, January 27, 2027");
+  });
+});
+
+describe("formatShortDate", () => {
+  test("is month and day, without the weekday, within the current year", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 11, 20, 12));
+    expect(formatShortDate(new Date(2026, 11, 28, 12))).toBe("December 28");
+  });
+
+  test("adds the year when it differs from the current year", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 11, 20, 12));
+    expect(formatShortDate(new Date(2027, 0, 27, 12))).toBe("January 27, 2027");
   });
 });
 

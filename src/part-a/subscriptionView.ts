@@ -51,15 +51,16 @@ export function toView(sub: Subscription): SubscriptionView {
   }
 }
 
-export function formatDate(date: Date): string {
+function format(date: Date, options: Intl.DateTimeFormatOptions): string {
   const otherYear = date.getFullYear() !== new Date().getFullYear();
-  return date.toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    ...(otherYear && { year: "numeric" }),
-  });
+  return date.toLocaleDateString("en-US", { ...options, ...(otherYear && { year: "numeric" }) });
 }
+
+/** "Thursday, November 5": for sentences where the exact day matters (confirmation, success). */
+export const formatDate = (date: Date) => format(date, { weekday: "long", month: "long", day: "numeric" });
+
+/** "November 5": for the big date lines, so their length barely varies. */
+export const formatShortDate = (date: Date) => format(date, { month: "long", day: "numeric" });
 
 export const formatMoney = (cents: number) =>
   (cents / 100).toLocaleString("en-US", { style: "currency", currency: "USD" });
