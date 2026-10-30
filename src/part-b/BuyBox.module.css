@@ -270,8 +270,8 @@
 
 .purchaseRow {
   display: flex;
+  flex-wrap: wrap; /* very narrow screens: the button drops below the stepper at full width */
   gap: 12px;
-  height: 56px;
   margin-top: 24px;
 }
 .stepper {
@@ -280,6 +280,7 @@
   flex: none;
   grid-template-columns: 45px 35px 46px;
   width: 128px;
+  height: 56px;
   background: #fff;
   border: 1px solid var(--border-control);
   border-radius: 12px;
@@ -297,6 +298,9 @@
 .stepper button[aria-disabled="true"] {
   cursor: not-allowed;
 }
+.stepper button[aria-disabled="true"] svg {
+  opacity: 0.4; /* on the glyph only, so the focus ring keeps full contrast */
+}
 .quantity {
   display: grid;
   place-items: center;
@@ -305,8 +309,10 @@
   color: var(--ink);
 }
 .addToCart {
-  flex: 1;
-  min-width: 0;
+  flex: 1 0 auto;
+  height: 56px;
+  padding: 0 16px;
+  white-space: nowrap; /* keeps "Add to cart · $x" on one line */
   background: var(--green);
   border: 0;
   border-radius: 11px;
@@ -349,12 +355,13 @@
   color: var(--muted-on-page);
 }
 
-/* Below 860px the details column would drop under ~380px, too narrow for the option row: stack. */
-@media (max-width: 859px) {
+/* At 960px and below the two columns get too narrow for the option row (measured): stack, centred, max 540px. */
+@media (max-width: 960px) {
   .page {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 540px);
+    justify-content: center;
     row-gap: 32px;
-    padding: 48px 16px;
+    padding: 16px;
   }
   .imageCard {
     width: 100%;
@@ -362,6 +369,22 @@
   }
   .optionRow {
     flex-wrap: wrap;
+  }
+}
+
+/* Above 960px the nav floats (32px), so the box starts at y=0 like the reference; it is static when stacked. */
+@media (min-width: 961px) {
+  :global(body):has(.page) :global(nav) {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 1;
+    box-sizing: border-box;
+    height: 32px;
+    align-items: center;
+    background: var(--page);
+  }
+  :global(html):has(.page) {
+    scroll-padding-top: 40px; /* focused elements never end up under the fixed nav */
   }
 }
 

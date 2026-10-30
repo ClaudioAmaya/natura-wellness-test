@@ -13,7 +13,8 @@ const addToCart = () => screen.getByRole("button", { name: new RegExp(`^${copy.a
 const quantity = () => screen.getByRole("group", { name: "Quantity" });
 const decrease = () => within(quantity()).getByRole("button", { name: "Decrease quantity" });
 const increase = () => within(quantity()).getByRole("button", { name: "Increase quantity" });
-const quantityValue = () => within(quantity()).getByRole("status").textContent;
+// The visible number; the output also holds visually hidden "Quantity " for screen readers.
+const quantityValue = () => within(quantity()).getByRole("status").textContent?.replace(/^Quantity /, "");
 const frequency = () => screen.queryByRole<HTMLSelectElement>("combobox", { name: copy.subscribe.frequencyLabel });
 
 describe("purchase options", () => {
@@ -66,6 +67,34 @@ describe("quantity", () => {
     expect(quantityValue()).toBe("10");
     expect(increase().getAttribute("aria-disabled")).toBe("true");
     expect(decrease().getAttribute("aria-disabled")).toBe("false");
+  });
+});
+
+describe("review fixes", () => {
+  test("the buy box is inside a main landmark", () => {
+    render(<BuyBox />);
+    expect(within(screen.getByRole("main")).getByRole("heading", { level: 1, name: copy.title })).toBeTruthy();
+  });
+
+  test("the quantity output announces 'Quantity 2' while the hidden part stays out of the visible number", () => {
+    render(<BuyBox />);
+    fireEvent.click(increase());
+    const output = within(quantity()).getByRole("status");
+    expect(output.textContent).toBe("Quantity 2");
+    expect(output.querySelector('[class*="srOnly"]')?.textContent).toBe("Quantity ");
+  });
+
+  test("the rating reads '4.8 out of 5' for screen readers", () => {
+    render(<BuyBox />);
+    expect(screen.getByText((_, el) => el?.tagName === "SPAN" && el.textContent === `${copy.rating} out of 5`)).toBeTruthy();
+  });
+
+  test("the product image has a descriptive alt that does not just repeat the title", () => {
+    render(<BuyBox />);
+    const alt = screen.getByRole("img").getAttribute("alt") ?? "";
+    expect(alt).not.toBe(copy.title);
+    expect(alt).toContain(copy.title);
+    expect(alt).toMatch(/60 softgels/i);
   });
 });
 

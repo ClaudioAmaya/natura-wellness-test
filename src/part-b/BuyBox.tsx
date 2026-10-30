@@ -19,9 +19,9 @@ export function BuyBox() {
   const atMax = quantity >= MAX_QUANTITY;
 
   return (
-    <div className={styles.page}>
+    <main className={styles.page}>
       <div className={styles.imageCard}>
-        <img src="/product.jpg" alt={copy.title} className={styles.photo} />
+        <img src="/product.jpg" alt={`Natura Wellness ${copy.title} bottle, 60 softgels`} className={styles.photo} />
       </div>
 
       <section aria-labelledby={titleId} className={styles.details}>
@@ -32,7 +32,10 @@ export function BuyBox() {
               <Star key={i} />
             ))}
           </span>
-          <span className={styles.ratingValue}>{copy.rating}</span>
+          <span className={styles.ratingValue}>
+            {copy.rating}
+            <span className={styles.srOnly}> out of 5</span>
+          </span>
           {/* ponytail: no reviews section exists yet; the anchor is a placeholder target. */}
           <a href="#reviews" className={styles.reviews}>
             {copy.reviewCount}
@@ -126,7 +129,10 @@ export function BuyBox() {
               <Minus />
             </button>
             {/* <output> is an implicit live region: it is the only quantity announcement. */}
-            <output className={styles.quantity}>{quantity}</output>
+            <output className={styles.quantity}>
+              <span className={styles.srOnly}>Quantity </span>
+              {quantity}
+            </output>
             <button
               type="button"
               aria-label="Increase quantity"
@@ -157,7 +163,7 @@ export function BuyBox() {
 
         {fine && <p className={styles.finePrint}>{fine}</p>}
       </section>
-    </div>
+    </main>
   );
 }
 
