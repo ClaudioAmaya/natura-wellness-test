@@ -164,7 +164,7 @@ export function BuyBox() {
 // Inline icons: decorative, sized and coloured by CSS (currentColor).
 function Star() {
   return (
-    <svg viewBox="0 0 16 16" width="15" height="15">
+    <svg viewBox="0 0 16 16" width="16" height="16">
       <path
         fill="currentColor"
         d="M8 1.1l2.03 4.3 4.7.6-3.44 3.25.86 4.66L8 11.63 3.85 13.91l.86-4.66L1.27 6l4.7-.6z"
@@ -175,7 +175,7 @@ function Star() {
 
 function Check() {
   return (
-    <svg aria-hidden="true" viewBox="0 0 12 12" width="12" height="12" className={styles.icon}>
+    <svg aria-hidden="true" viewBox="0 0 12 12" width="14" height="14" className={styles.icon}>
       <path d="M1.75 6.25l2.75 2.75 5.75-6.25" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
@@ -192,7 +192,7 @@ function CheckCircle() {
 
 function Chevron() {
   return (
-    <svg aria-hidden="true" viewBox="0 0 12 12" width="10" height="10" className={styles.chevron}>
+    <svg aria-hidden="true" viewBox="0 0 12 12" width="13" height="13" className={styles.chevron}>
       <path d="M2.5 4.5L6 8l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
@@ -200,7 +200,7 @@ function Chevron() {
 
 function Minus() {
   return (
-    <svg aria-hidden="true" viewBox="0 0 14 14" width="14" height="14">
+    <svg aria-hidden="true" viewBox="0 0 14 14" width="11" height="11">
       <path d="M2 7h10" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
     </svg>
   );
@@ -208,7 +208,7 @@ function Minus() {
 
 function Plus() {
   return (
-    <svg aria-hidden="true" viewBox="0 0 14 14" width="14" height="14">
+    <svg aria-hidden="true" viewBox="0 0 14 14" width="11" height="11">
       <path d="M2 7h10M7 2v10" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
     </svg>
   );

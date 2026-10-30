@@ -33,7 +33,7 @@
 }
 .photo {
   display: block;
-  width: 90.4%; /* estimated: about 488 of 540 */
+  width: 92.9%; /* tuned against the reference: about 502 of 540 */
   height: auto;
 }
 
@@ -46,7 +46,7 @@
   font-size: 12px;
   font-weight: 600;
   line-height: 14px;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--muted-on-page);
 }
@@ -57,13 +57,12 @@
   gap: 8px;
   height: 20px;
   margin-top: 14px;
-  font-size: 15px;
+  font-size: 14px;
   line-height: 20px;
 }
 .stars {
   display: flex;
-  gap: 3px;
-  margin-right: 2px;
+  gap: 2px;
   color: var(--star);
 }
 .stars svg {
@@ -77,28 +76,30 @@
   color: var(--muted-on-page);
   text-decoration: underline;
   text-decoration-thickness: 1px;
-  text-underline-offset: 3px;
+  text-underline-offset: 2px;
 }
 
 .title {
-  margin: 7px 0 0;
+  margin: 7.5px 0 0;
   font-family: var(--font-serif);
-  font-size: 46px;
-  font-weight: 600;
+  font-size: 44px;
+  font-weight: 500;
   line-height: 52px;
+  letter-spacing: -0.01em;
   color: var(--green);
 }
 
 .subtitle {
-  margin: 10px 0 0;
-  font-size: 17px;
-  line-height: 25.5px;
+  max-width: 440px; /* the reference wraps before "day," */
+  margin: 10.75px 0 0;
+  font-size: 16px;
+  line-height: 25px;
   color: var(--text-inactive);
 }
 
 .divider {
   height: 0;
-  margin: 28px 0 24px;
+  margin: 26.5px 0 24px;
   border: 0;
   border-top: 1px solid var(--border);
 }
@@ -189,12 +190,13 @@
   margin-left: auto;
 }
 .price {
-  font-size: 18px;
+  font-size: 17.5px;
   font-weight: 700;
   line-height: 26px;
   color: var(--ink);
 }
 .compare {
+  margin-top: -2px;
   font-size: 13px;
   line-height: 18px;
   color: var(--strike);
@@ -202,14 +204,14 @@
 
 /* Subscribe extras line up with the option label (20 padding + 20 radio + 12 gap). */
 .extras {
-  margin-top: -4px;
-  padding: 0 20px 16px 52px;
+  margin-top: -3px;
+  padding: 0 20px 17px 52px;
 }
 .frequency {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 15px;
+  font-size: 14px;
   line-height: 20px;
   color: var(--text-inactive);
 }
@@ -227,13 +229,13 @@
   border: 1px solid var(--border-control);
   border-radius: 8px;
   color: var(--ink);
-  font: 400 15px/20px var(--font-sans);
+  font: 400 14px/20px var(--font-sans);
   cursor: pointer;
 }
 .chevron {
   position: absolute;
   top: 50%;
-  right: 12px;
+  right: 13px;
   translate: 0 -50%;
   color: var(--text-inactive);
   pointer-events: none;
@@ -244,7 +246,7 @@
   margin: 12px 0 0;
   padding: 0;
   list-style: none;
-  font-size: 15px;
+  font-size: 14px;
   line-height: 21px;
   color: var(--ink);
 }
@@ -255,7 +257,11 @@
   gap: 8px;
 }
 .perks li {
-  gap: 12px;
+  gap: 10px;
+}
+.trust li {
+  gap: 7px;
+  padding-left: 1px;
 }
 .icon {
   flex: none;
@@ -272,7 +278,7 @@
   box-sizing: border-box;
   display: grid;
   flex: none;
-  grid-template-columns: 40px 46px 40px;
+  grid-template-columns: 45px 35px 46px;
   width: 128px;
   background: #fff;
   border: 1px solid var(--border-control);
@@ -303,7 +309,7 @@
   min-width: 0;
   background: var(--green);
   border: 0;
-  border-radius: 12px;
+  border-radius: 11px;
   color: var(--on-green);
   font: 600 16px/24px var(--font-sans);
   cursor: pointer;
@@ -327,19 +333,19 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px 24px;
-  margin: 16px 0 0;
+  margin: 18px 0 0;
   padding: 0;
   list-style: none;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 500;
   line-height: 20px;
   color: var(--text-inactive);
 }
 
 .finePrint {
-  margin: 14px 0 0;
-  font-size: 13px;
-  line-height: 19px;
+  margin: 13px 0 0;
+  font-size: 12px;
+  line-height: 18px;
   color: var(--muted-on-page);
 }
 
