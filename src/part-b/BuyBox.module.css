@@ -1,0 +1,372 @@
+/* Desktop first: values measured from public/reference/buy-box.png at 1200px (CSS px = image px / 2). */
+.page {
+  /* Part B tokens, scoped here so the shared tokens.css stays untouched. Sampled unless marked. */
+  --tint: #f3f6f2;
+  --border-option: #e1dbcf;
+  --border-control: #cfd6d0;
+  --star: #d8a23a;
+  --muted-on-page: #65736a; /* AA fix: reference #6b7a70 is 4.27:1 on --page; this is 4.70 */
+  --strike: #687069; /* AA fix: reference #8a948e is 2.87:1 on --tint; this is 4.69 */
+  --radio-ring: #87918b; /* AA fix: reference #9aa59e is 2.55:1 on white; this is 3.25 */
+
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: minmax(0, 540fr) minmax(0, 468fr);
+  column-gap: 64px;
+  align-items: start;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 56px 64px 64px;
+  color: var(--ink);
+  font-family: var(--font-sans);
+}
+
+.imageCard {
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+}
+.photo {
+  display: block;
+  width: 90.4%; /* estimated: about 488 of 540 */
+  height: auto;
+}
+
+.details {
+  min-width: 0;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 14px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted-on-page);
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 20px;
+  margin-top: 14px;
+  font-size: 15px;
+  line-height: 20px;
+}
+.stars {
+  display: flex;
+  gap: 3px;
+  margin-right: 2px;
+  color: var(--star);
+}
+.stars svg {
+  display: block;
+}
+.ratingValue {
+  font-weight: 600;
+  color: var(--ink);
+}
+.reviews {
+  color: var(--muted-on-page);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.title {
+  margin: 7px 0 0;
+  font-family: var(--font-serif);
+  font-size: 46px;
+  font-weight: 600;
+  line-height: 52px;
+  color: var(--green);
+}
+
+.subtitle {
+  margin: 10px 0 0;
+  font-size: 17px;
+  line-height: 25.5px;
+  color: var(--text-inactive);
+}
+
+.divider {
+  height: 0;
+  margin: 28px 0 24px;
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+
+/* Purchase options: native radios in a fieldset; the card is styled from the radio's state. */
+.options {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.option {
+  background: #fff;
+  border: 1px solid var(--border-option);
+  border-radius: 14px;
+}
+.selected {
+  /* 1px border + 1px inset shadow = the reference's 2px, without shifting the content. */
+  background: var(--tint);
+  border-color: var(--green);
+  box-shadow: inset 0 0 0 1px var(--green);
+}
+.option:has(.radioInput:focus-visible) {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+.optionRow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  cursor: pointer;
+}
+.radioInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+}
+.radio {
+  box-sizing: border-box;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  background: #fff;
+  border: 1.5px solid var(--radio-ring);
+  border-radius: 50%;
+}
+.selected .radio {
+  border: 2px solid var(--green);
+}
+.selected .radio::after {
+  width: 10px;
+  height: 10px;
+  background: var(--green);
+  border-radius: 50%;
+  content: "";
+}
+.optionLabel {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+  color: var(--ink);
+}
+.badge {
+  flex: none;
+  height: 21px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: var(--amber-bg);
+  color: var(--amber-text);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 21px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.prices {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-left: auto;
+}
+.price {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 26px;
+  color: var(--ink);
+}
+.compare {
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--strike);
+}
+
+/* Subscribe extras line up with the option label (20 padding + 20 radio + 12 gap). */
+.extras {
+  margin-top: -4px;
+  padding: 0 20px 16px 52px;
+}
+.frequency {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  line-height: 20px;
+  color: var(--text-inactive);
+}
+.selectWrap {
+  position: relative;
+  display: inline-flex;
+}
+.selectWrap select {
+  box-sizing: border-box;
+  width: 116px;
+  height: 33px;
+  padding: 0 30px 0 12px;
+  appearance: none;
+  background: #fff;
+  border: 1px solid var(--border-control);
+  border-radius: 8px;
+  color: var(--ink);
+  font: 400 15px/20px var(--font-sans);
+  cursor: pointer;
+}
+.chevron {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  translate: 0 -50%;
+  color: var(--text-inactive);
+  pointer-events: none;
+}
+.perks {
+  display: grid;
+  gap: 4px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 15px;
+  line-height: 21px;
+  color: var(--ink);
+}
+.perks li,
+.trust li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.perks li {
+  gap: 12px;
+}
+.icon {
+  flex: none;
+  color: var(--green);
+}
+
+.purchaseRow {
+  display: flex;
+  gap: 12px;
+  height: 56px;
+  margin-top: 24px;
+}
+.stepper {
+  box-sizing: border-box;
+  display: grid;
+  flex: none;
+  grid-template-columns: 40px 46px 40px;
+  width: 128px;
+  background: #fff;
+  border: 1px solid var(--border-control);
+  border-radius: 12px;
+}
+.stepper button {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 10px;
+  color: var(--text-inactive);
+  cursor: pointer;
+}
+.stepper button[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+.quantity {
+  display: grid;
+  place-items: center;
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.addToCart {
+  flex: 1;
+  min-width: 0;
+  background: var(--green);
+  border: 0;
+  border-radius: 12px;
+  color: var(--on-green);
+  font: 600 16px/24px var(--font-sans);
+  cursor: pointer;
+}
+.dot {
+  margin: 0 6px;
+}
+
+.selectWrap select:focus-visible,
+.addToCart:focus-visible,
+.reviews:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+.stepper button:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: -2px;
+}
+
+.trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--text-inactive);
+}
+
+.finePrint {
+  margin: 14px 0 0;
+  font-size: 13px;
+  line-height: 19px;
+  color: var(--muted-on-page);
+}
+
+/* Below 860px the details column would drop under ~380px, too narrow for the option row: stack. */
+@media (max-width: 859px) {
+  .page {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 32px;
+    padding: 48px 16px;
+  }
+  .imageCard {
+    width: 100%;
+    max-width: 540px;
+  }
+  .optionRow {
+    flex-wrap: wrap;
+  }
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
