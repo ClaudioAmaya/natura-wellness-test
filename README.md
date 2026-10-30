@@ -81,3 +81,21 @@ I went over the suggested hour. The extra time went into tests, accessibility an
 ## How I used AI
 
 I directed Claude Code step by step (read, plan, build, review) and approved every file write. It never committed or pushed; I did. Tests for the logic and behavior were written first and shown failing before the implementation. When I re-ran the suite myself I found a flaky focus test that the AI had reported as passing, which led to a real accessibility fix (focus restoration moved to a layout effect). The full conversation is at: ai-conversation/claude-code-session.txt.
+
+## Where to look in the conversation
+
+The conversation is long (about 7,500 lines). These are the moments that show how I directed and checked the work:
+
+**Part A**
+- [Taking charge and the first read-only pass](ai-conversation/claude-code-session.txt#L5-L60)
+- [Part A plan, approved after three revisions](ai-conversation/claude-code-session.txt#L423)
+- [Tests first: a stub that throws and 12 failing tests](ai-conversation/claude-code-session.txt#L850-L966)
+- [A flaky test I found myself, the root cause, and the fix](ai-conversation/claude-code-session.txt#L3630-L3800) (result: 0 failures in 20 runs, [line 4046](ai-conversation/claude-code-session.txt#L4046))
+- [Strict review of Part A, and my call on a conflicting instruction](ai-conversation/claude-code-session.txt#L4199-L4280)
+
+**Part B**
+- [Part B decisions: collapsed extras and five contrast fixes](ai-conversation/claude-code-session.txt#L4994-L5002)
+- [Part B plan, approved before building](ai-conversation/claude-code-session.txt#L5068-L5071)
+- [Comparison with the reference: 3.98% down to 1.72% of pixels different](ai-conversation/claude-code-session.txt#L6003-L6010)
+- [Reverting a worse tuning round and choosing the title weight with measurements](ai-conversation/claude-code-session.txt#L6220-L6405)
+- [A mistake by the AI (a blank capture), admitted and fixed](ai-conversation/claude-code-session.txt#L6996-L7007)
