@@ -20,6 +20,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px 12px;
+  margin-bottom: 20px;
 }
 
 .heading {
@@ -53,10 +54,31 @@
   background: var(--neutral-bg);
 }
 
-.alert:not(:empty) {
-  margin: 20px 0 0;
+/* Live regions stay mounted between the items and the action; they only take space when they have text. */
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0 0 16px;
   font-size: 16px;
   line-height: 24px;
+}
+.success,
+.warning {
+  padding: 12px 14px;
+  border-radius: 10px;
+}
+.success {
+  color: var(--green); /* 9.04:1 on --active-bg */
+  background: var(--active-bg);
+}
+.warning {
+  color: var(--amber-text); /* 5.20:1 on --amber-bg */
+  background: var(--amber-bg);
+}
+.noticeIcon {
+  flex: none;
+  margin-top: 2px;
 }
 
 .body {
@@ -109,7 +131,8 @@
   padding-top: 0;
   border-top: 0;
 }
-.items:last-child {
+/* Paused and cancelled end with the items: no action below, so no closing divider. */
+.inactive .items {
   margin-bottom: 0;
   padding-bottom: 0;
   border-bottom: 0;
@@ -191,8 +214,38 @@
   background: #fff;
 }
 
+.button[aria-disabled="true"] {
+  cursor: progress;
+}
+
+/* Inline confirmation: replaces the Skip button; heading and consequence first, buttons below. */
+.panel {
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--page);
+}
+.panelHeading {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 28px;
+  color: var(--ink);
+}
+.panelText {
+  margin: 8px 0 0;
+  font-size: 16px;
+  line-height: 24px;
+}
+.actions {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
 .button:focus-visible,
-.heading:focus-visible {
+.heading:focus-visible,
+.panelHeading:focus-visible {
   outline: 2px solid var(--green);
   outline-offset: 2px;
 }
