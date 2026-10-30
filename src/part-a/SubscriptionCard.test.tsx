@@ -16,7 +16,8 @@ const LOAD_ERROR = "We couldn't load your subscription right now. Please try aga
 const CONFLICT =
   "Your subscription was updated elsewhere. We've refreshed it. Please check the details and try again if you still want to skip.";
 const SKIP_ERROR = "We couldn't skip your shipment, and nothing has changed. Please try again.";
-const SLOW = "This is taking longer than usual…";
+const SLOW =
+  "This is taking longer than usual. Keep this page open: the result will appear here, so there's no need to tap again.";
 const card = () => screen.getByRole("region", { name: "Manage my subscription" });
 // Matches a sentence even when part of it is wrapped in markup (e.g. a bold amount).
 const sentence = (text: string) => (_: string, el: Element | null) => el?.tagName === "P" && el.textContent === text;
@@ -34,7 +35,7 @@ describe("loading and active", () => {
     getSub.mockResolvedValue(sub);
     render(<SubscriptionCard />);
 
-    expect(card().getAttribute("aria-busy")).toBe("true");
+    expect(card().hasAttribute("aria-busy")).toBe(false);
     expect(screen.getByRole("status").textContent).toBe("Loading your subscription…");
 
     expect(await screen.findByText(formatShortDate(new Date(sub.nextChargeAt!)))).toBeTruthy();
@@ -409,6 +410,115 @@ describe("notice placement", () => {
     render(<SubscriptionCard />);
     const tryAgain = await screen.findByRole("button", { name: "Try again" });
     expect(isBefore(screen.getByRole("alert"), tryAgain)).toBe(true);
+  });
+});
+
+describe("review fixes", () => {
+  const heading = () => screen.getByRole("heading", { name: "Manage my subscription" });
+  const skipButton = () => screen.getByRole("button", { name: "Skip next shipment" });
+  const statusText = () => screen.getByRole("status").textContent;
+  const alertText = () => screen.getByRole("alert").textContent;
+
+  async function failFirstLoadThenClickTryAgain(reload: () => Promise<Subscription>) {
+    getSub.mockRejectedValueOnce(new ApiError(500, "Internal server error")).mockImplementationOnce(reload);
+    render(<SubscriptionCard />);
+    const tryAgain = await screen.findByRole("button", { name: "Try again" });
+    tryAgain.focus();
+    fireEvent.click(tryAgain);
+  }
+
+  // H1
+  test("Try again moves focus to the card heading at once, then to Skip when the reload ends active", async () => {
+    let resolveReload!: (sub: Subscription) => void;
+    await failFirstLoadThenClickTryAgain(() => new Promise((resolve) => (resolveReload = resolve)));
+    expect(document.activeElement).toBe(heading());
+
+    await act(async () => resolveReload(fixtures.active()));
+    expect(document.activeElement).toBe(skipButton());
+  });
+
+  test.each([
+    ["paused", () => Promise.resolve(fixtures.paused()), () => screen.findByText("Paused")],
+    ["in another error", () => Promise.reject(new ApiError(500, "Internal server error")), () => screen.findByRole("button", { name: "Try again" })],
+  ])("Try again leaves focus on the card heading when the reload ends %s", async (_, reload, settled) => {
+    await failFirstLoadThenClickTryAgain(reload);
+    await settled();
+    expect(document.activeElement).toBe(heading());
+  });
+
+  // M1
+  test("the loading message arrives as a change to the always-mounted status region, and the card has no aria-busy", () => {
+    getSub.mockReturnValue(new Promise(() => {}));
+    const observer = new MutationObserver(() => {});
+    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+    render(<SubscriptionCard />);
+    const records = observer.takeRecords();
+    observer.disconnect();
+
+    const status = screen.getByRole("status");
+    expect(status.textContent).toBe("Loading your subscription…");
+    // Initial content would arrive inside the subtree insertion; a live-region change is its own record.
+    expect(records.some((r) => r.target === status || r.target.parentNode === status)).toBe(true);
+    expect(card().hasAttribute("aria-busy")).toBe(false);
+  });
+
+  // M2
+  test("during the initial load, after 4s the status says it is taking longer and what to do", async () => {
+    vi.useFakeTimers();
+    getSub.mockReturnValue(new Promise(() => {}));
+    render(<SubscriptionCard />);
+    await act(() => vi.advanceTimersByTimeAsync(3999));
+    expect(statusText()).toBe("Loading your subscription…");
+    await act(() => vi.advanceTimersByTimeAsync(1));
+    expect(statusText()).toBe(SLOW);
+    vi.useRealTimers();
+  });
+
+  // M3
+  async function renderActiveAndConfirmSkip(skipError: ApiError) {
+    const sub = fixtures.active();
+    getSub.mockResolvedValueOnce(sub);
+    skip.mockRejectedValueOnce(skipError);
+    render(<SubscriptionCard />);
+    fireEvent.click(await screen.findByRole("button", { name: "Skip next shipment" }));
+    return sub;
+  }
+
+  test("a 400 on skip refetches and shows the fresh (paused) state with the changed-elsewhere notice, without retrying", async () => {
+    await renderActiveAndConfirmSkip(new ApiError(400, "Only active subscriptions can skip a shipment"));
+    getSub.mockResolvedValueOnce(fixtures.paused());
+    fireEvent.click(screen.getByRole("button", { name: "Yes, skip it" }));
+
+    expect(await screen.findByText("Paused")).toBeTruthy();
+    expect(alertText()).toBe(CONFLICT);
+    expect(screen.queryByRole("button", { name: "Skip next shipment" })).toBeNull();
+    expect(getSub).toHaveBeenCalledTimes(2);
+    expect(skip).toHaveBeenCalledTimes(1);
+    expect(document.activeElement).toBe(heading());
+  });
+
+  test("a 404 on skip refetches and returns to idle with fresh data; skipping again needs a new confirmation", async () => {
+    const sub = await renderActiveAndConfirmSkip(new ApiError(404, "Subscription not found"));
+    const fresh = { ...sub, nextChargeAt: new Date(Date.parse(sub.nextChargeAt!) + 3 * DAY_MS).toISOString(), updatedAt: new Date().toISOString() };
+    getSub.mockResolvedValueOnce(fresh);
+    fireEvent.click(screen.getByRole("button", { name: "Yes, skip it" }));
+
+    expect(await screen.findByText(formatShortDate(new Date(fresh.nextChargeAt)))).toBeTruthy();
+    expect(alertText()).toBe(CONFLICT);
+    expect(document.activeElement).toBe(skipButton());
+    expect(getSub).toHaveBeenCalledTimes(2);
+    expect(skip).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole("button", { name: "Yes, skip it" })).toBeNull();
+  });
+
+  test("a 404 on skip whose refetch also fails shows the load-error state, not a raw message", async () => {
+    await renderActiveAndConfirmSkip(new ApiError(404, "Subscription not found"));
+    getSub.mockRejectedValueOnce(new ApiError(404, "Subscription not found"));
+    fireEvent.click(screen.getByRole("button", { name: "Yes, skip it" }));
+
+    expect(await screen.findByText(LOAD_ERROR)).toBeTruthy();
+    expect(screen.queryByText(/Subscription not found/)).toBeNull();
+    expect(skip).toHaveBeenCalledTimes(1);
   });
 });
 

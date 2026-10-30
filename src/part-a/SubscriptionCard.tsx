@@ -13,14 +13,17 @@ type Ready = {
   slow: boolean;
   notice: Notice;
 };
-type State = { kind: "loading" } | { kind: "loadError" } | Ready;
-type FocusTarget = "skip" | "panel";
+type State = { kind: "loading"; slow: boolean } | { kind: "loadError" } | Ready;
+type FocusTarget = "skip" | "panel" | "reload";
 
 const LOAD_ERROR = "We couldn't load your subscription right now. Please try again in a moment.";
 const CONFLICT =
   "Your subscription was updated elsewhere. We've refreshed it. Please check the details and try again if you still want to skip.";
 const SKIP_ERROR = "We couldn't skip your shipment, and nothing has changed. Please try again.";
-const SLOW = "This is taking longer than usual…";
+const SLOW =
+  "This is taking longer than usual. Keep this page open: the result will appear here, so there's no need to tap again.";
+// A 400 or 404 on skip also means the subscription changed since it was loaded: handle it like a 409.
+const CHANGED_ELSEWHERE = [400, 404, 409];
 const SLOW_AFTER_MS = 4000;
 const STATUS_LABEL = { active: "Active", paused: "Paused", cancelled: "Cancelled" };
 
@@ -36,8 +39,10 @@ function ready(sub: Subscription, notice: Notice): State {
 
 export function SubscriptionCard() {
   const headingId = useId();
-  const [state, setState] = useState<State>({ kind: "loading" });
+  const [state, setState] = useState<State>({ kind: "loading", slow: false });
   const [attempt, setAttempt] = useState(0);
+  // Set after mount, so "Loading…" is a change to the live region rather than initial content.
+  const [announceLoading, setAnnounceLoading] = useState(false);
 
   const inFlight = useRef(false); // double-submit guard: set synchronously, before any re-render
   const slowTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -46,21 +51,39 @@ export function SubscriptionCard() {
   const skipRef = useRef<HTMLButtonElement>(null);
   const panelHeadingRef = useRef<HTMLHeadingElement>(null);
 
+  useEffect(() => setAnnounceLoading(true), []);
+
   useEffect(() => {
     let ignore = false; // StrictMode and retries: only the latest request may set state
+    const slow = setTimeout(() => setState((s) => (s.kind === "loading" ? { ...s, slow: true } : s)), SLOW_AFTER_MS);
     getSubscription()
       .then((sub) => !ignore && setState(ready(sub, null)))
-      .catch(() => !ignore && setState({ kind: "loadError" }));
+      .catch(() => !ignore && setState({ kind: "loadError" }))
+      .finally(() => clearTimeout(slow));
     return () => {
       ignore = true;
+      clearTimeout(slow);
     };
   }, [attempt]);
 
   // Move focus after the render that shows the target; Skip falls back to the card heading.
   // Layout effect: runs inside the commit, so focus never sits on <body> for a task or a frame.
   useLayoutEffect(() => {
-    if (!focusNext.current) return;
-    const target = focusNext.current === "panel" ? panelHeadingRef.current : (skipRef.current ?? headingRef.current);
+    const next = focusNext.current;
+    if (!next) return;
+    if (next === "reload") {
+      // Try again unmounts itself: hold focus on the heading while loading, then move to the result,
+      // unless the customer has already moved focus somewhere else.
+      const lost = document.activeElement === document.body || document.activeElement === headingRef.current;
+      if (state.kind === "loading") {
+        if (lost) headingRef.current?.focus();
+        return;
+      }
+      focusNext.current = null;
+      if (lost) (skipRef.current ?? headingRef.current)?.focus();
+      return;
+    }
+    const target = next === "panel" ? panelHeadingRef.current : (skipRef.current ?? headingRef.current);
     focusNext.current = null;
     target?.focus();
   });
@@ -70,7 +93,8 @@ export function SubscriptionCard() {
   const updateReady = (patch: Partial<Ready>) => setState((s) => (s.kind === "ready" ? { ...s, ...patch } : s));
 
   const retry = () => {
-    setState({ kind: "loading" });
+    focusNext.current = "reload";
+    setState({ kind: "loading", slow: false });
     setAttempt((n) => n + 1);
   };
 
@@ -97,7 +121,7 @@ export function SubscriptionCard() {
     try {
       next = ready(await skipNextShipment({ subscriptionId: raw.id, expectedUpdatedAt: raw.updatedAt }), "success");
     } catch (error) {
-      if (error instanceof ApiError && error.status === 409) {
+      if (error instanceof ApiError && CHANGED_ELSEWHERE.includes(error.status)) {
         // Changed elsewhere: show the fresh data and let the customer decide again. No automatic retry.
         next = await getSubscription().then(
           (fresh) => ready(fresh, "conflict"),
@@ -114,13 +138,12 @@ export function SubscriptionCard() {
   };
 
   const view = state.kind === "ready" ? state.view : null;
-  const { alert, status } = notices(state);
+  const { alert, status } = notices(state, announceLoading);
 
   return (
     <main className={styles.page}>
       <section
         aria-labelledby={headingId}
-        aria-busy={state.kind === "loading"}
         className={`${styles.card} ${view && view.status !== "active" ? styles.inactive : ""}`}
       >
         <div className={styles.header}>
@@ -166,11 +189,12 @@ export function SubscriptionCard() {
 type Tone = "plain" | "success" | "warning" | "hidden";
 type RegionContent = { text: string; tone: Tone };
 
-function notices(state: State): { alert: RegionContent; status: RegionContent } {
+function notices(state: State, announceLoading: boolean): { alert: RegionContent; status: RegionContent } {
   const none: RegionContent = { text: "", tone: "plain" };
   if (state.kind === "loading") {
+    if (state.slow) return { alert: none, status: { text: SLOW, tone: "plain" } };
     // For screen readers only; the skeleton shows loading visually.
-    return { alert: none, status: { text: "Loading your subscription…", tone: "hidden" } };
+    return { alert: none, status: { text: announceLoading ? "Loading your subscription…" : "", tone: "hidden" } };
   }
   if (state.kind === "loadError") return { alert: { text: LOAD_ERROR, tone: "plain" }, status: none };
 
